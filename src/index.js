@@ -1,32 +1,58 @@
 const { getPage } = require('./utils')
 const fs = require('fs')
 
-const url = 'https://www.amazon.com/Best-Sellers/zgbs'
-
-function getPages(url) {
-  getPage(url).then(({ categories: mainCategories }) => {
-    Promise.all(
+/**
+ * getAllProducts - create a json array of categories with nested categories and products
+ *
+ * Object models:
+ *
+ *   Category: {
+ *     name: String,
+ *     url: String,
+ *     categories: [Category],
+ *     products: [Product]
+ *   }
+ *
+ *   Product: {
+ *     img: String,
+ *     name: String,
+ *     rank: Number,
+ *     rating: Number,
+ *     reviews: Number,
+ *     price: Number,
+ *     url: String
+ *   }
+ *
+ */
+exports.getAllProducts = () => {
+  const url = 'https://www.amazon.com/Best-Sellers/zgbs'
+  // getPage returns a Promise
+  return getPage(url).then(({ categories: mainCategories }) => {
+    // Promise.all waits for all promises in the array to resolve
+    return Promise.all(
+      // Iterate over main categories
       mainCategories.map(mainCategory => {
+        // Crawl each category url and return products and child categories
         return getPage(mainCategory.url).then(({ categories: subCategories, products: mainProducts }) => {
           return Promise.all(
             subCategories.map(subCategory => {
               return getPage(subCategory.url).then(({ categories: subSubCategories, products: subProducts }) => {
-                console.log(`Fetching ${mainCategory.name} - ${subCategory.name} (${subSubCategories.length} additional categories)`)
-                return Object.assign({}, subCategory, { categories: subSubCategories, products: subProducts })
+                // add categories and products to the sub category
+                return Object.assign(subCategory, { categories: subSubCategories, products: subProducts })
               })
             })
           ).then(result => {
+            // add categories and products to the main category
             return Object.assign(mainCategory, { categories: result, products: mainProducts })
           })
         })
       })
     )
     .then(results => {
+      // `results` is the final JSON array after all pages have been scraped
       const file = JSON.stringify(results, null, 2)
       fs.writeFileSync('./products.json', file, 'utf8')
-      console.log(`Fetched ${results.length} categories`)
-      console.log(`Writing csv...`)
-      writeFile()
+      return results
     })
     .catch(err => {
       console.error(err)
@@ -34,10 +60,15 @@ function getPages(url) {
   })
 }
 
-function writeFile() {
-  const file = JSON.parse(fs.readFileSync('./products.json', 'utf8'))
+/**
+ * json2csv takes a json array of nested categories and flattens them into a single
+ * array of products with labelled categories and subcategories.
+ */
+exports.json2csv = (json) => {
+  // container for our flat array of products
   const products = []
 
+  // helper function to filter a product based on price and reviews
   const decentProduct = product => (
     product.price > 5 &&
     product.price < 100 &&
@@ -45,19 +76,16 @@ function writeFile() {
     product.reviews < 1000
   )
 
-  file.map(mainCategory => {
-    mainCategory.products
-      .map(product => {
-        if (decentProduct(product)) {
-          product.category = mainCategory.name
-          products.push(product)
-        }
-      })
-    mainCategory.categories.map(subCategory => {
-      const sub = subCategory.categories.reduce((str, subSubCategory) => {
-        return str + (str.length ? ', ' : '') + subSubCategory.name
-      }, '')
-      subCategory.products.map(product => {
+  // json is an array of categories
+  json.forEach(mainCategory => {
+    mainCategory.products.forEach(product => {
+      if (decentProduct(product)) {
+        product.category = mainCategory.name
+        products.push(product)
+      }
+    })
+    mainCategory.categories.forEach(subCategory => {
+      subCategory.products.forEach(product => {
         if (decentProduct(product)) {
           product.category = mainCategory.name
           product.subCategory = subCategory.name
@@ -67,14 +95,17 @@ function writeFile() {
     })
   })
 
+  // Build the csv headings from the first product keys
   const headers = Object.keys(products[0]).concat('sub').join('\t') + '\n'
-  const csv = headers + products.map(product => {
-    return Object.keys(product).map(key => `${product[key]}`).join('\t')
-  }).join('\n')
-
+  // Build the main csv body by joining all product values with a tab
+  const body = products.map(product => {
+    return Object.keys(product)
+      // for each key in product, return the value
+      .map(key => { return `${product[key]}` })
+      .join('\t')
+  })
+  // Build out the csv and save to file
+  const csv = headers + body.join('\n')
   fs.writeFileSync('products.csv', csv, 'utf8')
-  console.log(`Save csv`)
+  return Promise.resolve()
 }
-
-getPages(url)
-// writeFile()

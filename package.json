@@ -13,10 +13,10 @@
     "cheerio": "^0.22.0",
     "request": "^2.81.0"
   },
-  "scripts": {
-    "start": "nodemon ./src/index.js"
-  },
   "devDependencies": {
     "nodemon": "^1.11.0"
+  },
+  "scripts": {
+    "start": "nodemon index.js"
   }
 }
