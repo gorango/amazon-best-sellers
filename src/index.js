@@ -30,19 +30,20 @@ exports.getAllProducts = () => {
   return getPage(url).then(({ categories: mainCategories }) => {
     // Promise.all waits for all promises in the array to resolve
     return Promise.all(
-      // Iterate over main categories
+      // Iterate over main categories and return an array of Promises
       mainCategories.map(mainCategory => {
-        // Crawl each category url and return products and child categories
+        // Crawl each category url and return a promise with products and child categories
         return getPage(mainCategory.url).then(({ categories: subCategories, products: mainProducts }) => {
+          // Wait to crawl subcategories
           return Promise.all(
             subCategories.map(subCategory => {
               return getPage(subCategory.url).then(({ categories: subSubCategories, products: subProducts }) => {
-                // add categories and products to the sub category
+                // merge categories and products with the sub category object
                 return Object.assign(subCategory, { categories: subSubCategories, products: subProducts })
               })
             })
           ).then(result => {
-            // add categories and products to the main category
+            // merge categories and products with the main category object
             return Object.assign(mainCategory, { categories: result, products: mainProducts })
           })
         })
