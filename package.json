@@ -1,0 +1,22 @@
+{
+  "name": "amazon-best-sellers",
+  "version": "0.0.1",
+  "description": "crawl amazon best sellers pages and scrape product info",
+  "main": "index.js",
+  "repository": "https://github.com/gorango/amazon-best-sellers.git",
+  "author": "gorango",
+  "license": "MIT",
+  "engines": {
+    "node" : ">6"
+  },
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "request": "^2.81.0"
+  },
+  "scripts": {
+    "start": "nodemon ./src/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}

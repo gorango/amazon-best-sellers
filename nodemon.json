@@ -1,0 +1,10 @@
+{
+  "restartable": "rs",
+  "ignore": [
+    ".git",
+    "package.json",
+    "node_modules",
+    "products*"
+  ],
+  "ext": "js json"
+}
