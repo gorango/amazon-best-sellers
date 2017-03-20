@@ -108,5 +108,5 @@ exports.json2csv = (json) => {
   // Build out the csv and save to file
   const csv = headers + body.join('\n')
   fs.writeFileSync('products.csv', csv, 'utf8')
-  return Promise.resolve()
+  return Promise.resolve(csv)
 }

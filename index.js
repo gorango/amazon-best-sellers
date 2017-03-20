@@ -7,7 +7,7 @@ console.log('Starting...')
 // get an array of products
 getAllProducts().then(products => {
   // convert json response to csv file
-  json2csv(products).then(() => {
+  json2csv(products).then((csv) => {
     const now = Date.now()
     console.log(`Finished after ${ (now - then) / 1000 } seconds`)
   })
