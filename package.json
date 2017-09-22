@@ -2,12 +2,12 @@
   "name": "amazon-best-sellers",
   "version": "0.0.2",
   "description": "Crawl amazon best sellers pages and scrape product info",
-  "main": "index.js",
+  "main": "src/index.js",
   "repository": "https://github.com/gorango/amazon-best-sellers.git",
   "author": "gorango",
   "license": "MIT",
   "engines": {
-    "node" : ">6"
+    "node": ">6"
   },
   "dependencies": {
     "cheerio": "^0.22.0",
