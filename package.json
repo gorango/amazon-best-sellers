@@ -1,7 +1,7 @@
 {
   "name": "amazon-best-sellers",
-  "version": "0.0.1",
-  "description": "crawl amazon best sellers pages and scrape product info",
+  "version": "0.0.2",
+  "description": "Crawl amazon best sellers pages and scrape product info",
   "main": "index.js",
   "repository": "https://github.com/gorango/amazon-best-sellers.git",
   "author": "gorango",

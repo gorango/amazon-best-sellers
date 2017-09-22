@@ -1,3 +1,4 @@
+
 const request = require('request')
 const cheerio = require('cheerio')
 
@@ -43,27 +44,25 @@ const getCategories = $ => {
  * getPage returns a Promise object with categories and products found on that page
  * it can be accessed by chaining the `then` method to the return value
  */
-const getPage = url => {
+const getPage = url =>
   // Promise waits for `resolve` or `reject` to be called inside the function
   // Returns an object with methods `then` and `catch` to handle the response or error
-  return new Promise((resolve, reject) => {
+  new Promise((resolve, reject) => {
     request(url, (error, response) => {
       if (error) reject(error)
       else resolve(response)
     })
   })
-  .then(response => {
-    // response is a standard HTTP response object
-    // body contains the HTML
-    const $ = cheerio.load(response.body)
-    return {
-      categories: getCategories($),
-      products: getProducts($)
-    }
-  })
+  // response is a standard HTTP response object
+  // body contains the HTML
+  .then(({body}) => cheerio.load(body))
+  // referencing the previous return as a cheerio doc
+  .then($ => ({
+    categories: getCategories($),
+    products: getProducts($)
+  }))
   // will only happen if amazon blocked you or your internet is down...
   .catch(err => console.error(err))
-}
 
 module.exports = {
   getPage
